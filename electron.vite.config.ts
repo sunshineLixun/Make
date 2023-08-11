@@ -1,6 +1,9 @@
 import { resolve } from "path";
 import { defineConfig, externalizeDepsPlugin } from "electron-vite";
-import react from "@vitejs/plugin-react";
+import React from "@vitejs/plugin-react";
+import UnoCSS from "unocss/vite";
+import presetAttributify from "@unocss/preset-attributify";
+import presetUno from "@unocss/preset-uno";
 
 export default defineConfig({
   main: {
@@ -15,6 +18,11 @@ export default defineConfig({
         "@renderer": resolve("src/renderer/src")
       }
     },
-    plugins: [react()]
+    plugins: [
+      UnoCSS({
+        presets: [presetUno(), presetAttributify()]
+      }),
+      React()
+    ]
   }
 });
