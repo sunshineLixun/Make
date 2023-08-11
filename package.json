@@ -1,13 +1,13 @@
 {
-  "name": "my-app",
+  "name": "make",
   "version": "1.0.0",
   "description": "An Electron application with React and TypeScript",
   "main": "./out/main/index.js",
   "author": "example.com",
   "homepage": "https://www.electronjs.org",
   "scripts": {
-    "start": "electron-vite preview",
     "dev": "electron-vite dev",
+    "start": "electron-vite preview",
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
     "lint:eslint": "eslint --fix --ext .js,.ts,.vue ./src",
@@ -40,6 +40,7 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "@vitejs/plugin-react": "^4.0.3",
+    "axios": "^1.4.0",
     "cz-git": "^1.7.1",
     "czg": "^1.7.1",
     "electron": "^24.6.2",
@@ -54,6 +55,7 @@
     "prettier": "^2.8.8",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.15.0",
     "typescript": "^5.1.6",
     "unocss": "^0.55.0",
     "vite": "^4.4.2"

@@ -1,9 +1,8 @@
+import { RouterProvider } from "react-router-dom";
+import router from "@r/routers";
+
 function App(): JSX.Element {
-  return (
-    <div className="ma-20px">
-      <span className="color-#214545">test</span>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

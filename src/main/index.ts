@@ -2,12 +2,13 @@ import { app, shell, BrowserWindow } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
+import { downloadYtDlp } from "./utils/yt-dlp";
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 960,
+    height: 800,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === "linux" ? { icon } : {}),
@@ -50,6 +51,8 @@ app.whenReady().then(() => {
   });
 
   createWindow();
+
+  downloadYtDlp();
 
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
