@@ -1,4 +1,4 @@
-import { useRequestOpenAI } from "@r/service/request-openai";
+import { usePostRequest } from "@r/service/request-openai";
 import React, { useEffect, useState } from "react";
 
 export default function Container() {
@@ -9,7 +9,11 @@ export default function Container() {
   };
 
   useEffect(() => {
-    useRequestOpenAI("https://api.ai-yyds.com").then(res => {
+    usePostRequest([
+      {
+        role: ""
+      }
+    ]).then(res => {
       console.log(res);
     });
   }, []);

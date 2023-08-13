@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
-import { downloadYtDlp } from "./utils/yt-dlp";
+import { execPy, PyExecChild } from "./utils/exec-py";
 
 function createWindow(): void {
   // Create the browser window.
@@ -52,8 +52,6 @@ app.whenReady().then(() => {
 
   createWindow();
 
-  downloadYtDlp();
-
   app.on("activate", function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -67,8 +65,13 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
+    if (PyExecChild) {
+      PyExecChild.kill();
+    }
   }
 });
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
+
+execPy();
