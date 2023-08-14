@@ -2,7 +2,7 @@ import { app, shell, BrowserWindow } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
-import { execPy, PyExecChild } from "./utils/exec-py";
+import { downloadYt } from "./utils/yt-dlp";
 
 function createWindow(): void {
   // Create the browser window.
@@ -65,13 +65,9 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
-    if (PyExecChild) {
-      PyExecChild.kill();
-    }
   }
 });
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
-
-execPy();
+downloadYt();
