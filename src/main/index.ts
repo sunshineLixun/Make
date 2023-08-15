@@ -2,15 +2,19 @@ import { app, shell, BrowserWindow } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import icon from "../../resources/icon.png?asset";
-import { downloadYt } from "./utils/yt-dlp";
+import { registerDownloadYt } from "./ipc/handler";
+import { windowWidth, windowHeight } from "./constant";
 
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 960,
-    height: 800,
+    width: windowWidth,
+    height: windowHeight,
+    minWidth: windowWidth,
+    minHeight: windowHeight,
     show: false,
     autoHideMenuBar: true,
+    backgroundColor: "#272829",
     ...(process.platform === "linux" ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
@@ -50,6 +54,8 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window);
   });
 
+  registerDownloadYt();
+
   createWindow();
 
   app.on("activate", function () {
@@ -70,4 +76,3 @@ app.on("window-all-closed", () => {
 
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.
-downloadYt();

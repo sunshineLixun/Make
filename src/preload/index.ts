@@ -1,8 +1,14 @@
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
 
+export interface CustomApi {
+  downloadYtubeVideo: (videoUrl: string) => Promise<any>;
+}
+
 // Custom APIs for renderer
-const api = {};
+const api: CustomApi = {
+  downloadYtubeVideo: (videoUrl: string) => ipcRenderer.invoke("download:ytDlp", videoUrl)
+};
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
