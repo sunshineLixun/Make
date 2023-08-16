@@ -1,9 +1,13 @@
-import { app } from "electron";
-import fs from "node:fs";
 import youtubedl from "youtube-dl-exec";
-import { whisper } from "./whisper";
+import { whisper } from "../whisper/whisper";
+import { isExistSubtitle } from "../utils/is";
+import { ytVideoPath } from "../utils/constants";
 
-const downloadPath = app.getAppPath() + "/download/" + "%(id)s.%(ext)s";
+interface DownloadVideoInfo {
+  type: "info";
+  title: string;
+  thumbnail: string;
+}
 
 interface DownloadErrorResult {
   type: "failed";
@@ -21,7 +25,21 @@ interface DownloadProgress {
   progress: number;
 }
 
-export function downloadYt(
+export async function downloadVideoInfo(videoUrl: string): Promise<DownloadVideoInfo> {
+  console.log("downloadVideoInfo");
+  const ytRe = await youtubedl(videoUrl, {
+    getThumbnail: true,
+    getTitle: true
+  });
+  console.log("ytRe", ytRe);
+  return {
+    type: "info",
+    title: ytRe.title,
+    thumbnail: ytRe.thumbnail
+  };
+}
+
+export async function downloadYt(
   videoUrl: string,
   progressFn: (result: DownloadSuccessResult | DownloadProgress | DownloadErrorResult) => void
 ) {
@@ -29,7 +47,7 @@ export function downloadYt(
     writeAutoSub: true,
     writeSub: true,
     convertSubs: "srt",
-    output: downloadPath,
+    output: ytVideoPath,
     format: "mp4/bestvideo/best"
   });
 
@@ -37,15 +55,13 @@ export function downloadYt(
     try {
       const buffer = Buffer.from(data, "utf-8");
 
-      console.log(buffer.toString());
-
       let output = buffer
         .toString()
         .trim()
         .split(" ")
         .filter(n => n);
 
-      // console.log(output);
+      console.log(output);
 
       if (output[0] === "[download]" && parseFloat(output[1])) {
         const result: DownloadProgress = {
@@ -64,7 +80,7 @@ export function downloadYt(
   });
 
   ytDownload.stdout?.on("end", () => {
-    const isExistSub = existSubtitle();
+    const isExistSub = isExistSubtitle();
 
     if (!isExistSub) {
       whisper();
@@ -74,14 +90,13 @@ export function downloadYt(
       type: "finished",
       isExistSubtitle: isExistSub
     };
+
+    console.log("end", result);
+
     progressFn(result);
   });
 
   ytDownload.stdout?.on("close", data => {
     console.log("close", data);
   });
-}
-
-function existSubtitle() {
-  return fs.existsSync(downloadPath);
 }

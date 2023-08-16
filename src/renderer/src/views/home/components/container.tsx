@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { isValidHttpUrl } from "@r/utils/is";
 
 export default function Container() {
-  const [videoUrl, setVideoUrl] = useState("");
-  const [disabled, setDisabled] = useState(true);
+  const [videoUrl, setVideoUrl] = useState("https://www.youtube.com/watch?v=DT0p2EFTm9U");
+  const [disabled, setDisabled] = useState(false);
 
   const onInput = (el: React.ChangeEvent<HTMLInputElement>) => {
     const value = el.target.value;
@@ -21,8 +21,14 @@ export default function Container() {
     // ]).then(res => {
     //   console.log(res);
     // });
-    window.api.downloadYtHandler((_, result) => {
+    // 下载进度
+    window.api.downloadYtVideoProgress((_, result) => {
       console.log("downloadYtHandler", result);
+    });
+
+    // 视频封面 标题
+    window.api.downloadYtVideoInfo((_, result) => {
+      console.log("downloadYtVideoInfo", result);
     });
   }, []);
 
@@ -30,7 +36,7 @@ export default function Container() {
     window.api.downloadYtubeVideo(videoUrl);
   };
 
-  // https://www.youtube.com/watch?v=vPZ83zEqRyg
+  // https://www.youtube.com/watch?v=DT0p2EFTm9U
   return (
     <div className="w-[calc(100%-240px)] h-100%">
       <input
