@@ -1,6 +1,10 @@
 import youtubedl from "youtube-dl-exec";
 
-interface DownloadResult {
+interface DownloadErrorResult {
+  type: "failed";
+}
+
+interface DownloadSuccessResult {
   type: "finished";
 }
 
@@ -16,53 +20,57 @@ interface DownloadProgress {
   estimated: string;
 }
 
-export function downloadYt(videoUrl: string): Promise<DownloadResult | DownloadProgress> {
-  return new Promise((resolve, reject) => {
-    const ytDownload = youtubedl.exec(videoUrl, {
-      writeAutoSub: true,
-      writeSub: true,
-      convertSubs: "srt",
-      output: process.cwd() + "/resources/subtitle",
-      format: "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
-    });
+export function downloadYt(
+  videoUrl: string,
+  progressFn: (result: DownloadSuccessResult | DownloadProgress | DownloadErrorResult) => void
+) {
+  const ytDownload = youtubedl.exec(videoUrl, {
+    writeAutoSub: true,
+    writeSub: true,
+    convertSubs: "srt",
+    output: process.cwd() + "/resources/subtitle",
+    format: "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+  });
 
-    ytDownload.stdout?.on("data", data => {
-      try {
-        const buffer = Buffer.from(data, "utf-8");
+  ytDownload.stdout?.on("data", data => {
+    try {
+      const buffer = Buffer.from(data, "utf-8");
 
-        let output = buffer
-          .toString()
-          .trim()
-          .split(" ")
-          .filter(n => n);
+      let output = buffer
+        .toString()
+        .trim()
+        .split(" ")
+        .filter(n => n);
 
-        // console.log(output);
+      // console.log(output);
 
-        if (output[0] === "[download]" && parseFloat(output[1])) {
-          const result: DownloadProgress = {
-            type: "progress",
-            progress: parseFloat(output[1]),
-            size: output[4],
-            speed: output[6],
-            estimated: output[8]
-          };
-          resolve(result);
-        }
-      } catch (err) {
-        console.log("parse error", err);
-        reject(err);
+      if (output[0] === "[download]" && parseFloat(output[1])) {
+        const result: DownloadProgress = {
+          type: "progress",
+          progress: parseFloat(output[1]),
+          size: output[4],
+          speed: output[6],
+          estimated: output[8]
+        };
+        progressFn(result);
       }
-    });
-
-    ytDownload.stdout?.on("end", () => {
-      const result: DownloadResult = {
-        type: "finished"
+    } catch (err) {
+      console.log("parse error", err);
+      const result: DownloadErrorResult = {
+        type: "failed"
       };
-      resolve(result);
-    });
+      progressFn(result);
+    }
+  });
 
-    ytDownload.stdout?.on("close", data => {
-      console.log("close", data);
-    });
+  ytDownload.stdout?.on("end", () => {
+    const result: DownloadSuccessResult = {
+      type: "finished"
+    };
+    progressFn(result);
+  });
+
+  ytDownload.stdout?.on("close", data => {
+    console.log("close", data);
   });
 }

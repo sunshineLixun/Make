@@ -21,11 +21,14 @@ export default function Container() {
     // ]).then(res => {
     //   console.log(res);
     // });
+
+    window.api.downloadYtHandler((event, result) => {
+      console.log(event, result);
+    });
   }, []);
 
-  const onDownload = async () => {
-    const result = await window.api.downloadYtubeVideo(videoUrl);
-    console.log("result", result);
+  const onDownload = () => {
+    window.api.downloadYtubeVideo(videoUrl);
   };
 
   // https://www.youtube.com/watch?v=vPZ83zEqRyg

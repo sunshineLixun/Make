@@ -1,13 +1,16 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { IpcRendererEvent, contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
 
 export interface CustomApi {
-  downloadYtubeVideo: (videoUrl: string) => Promise<any>;
+  downloadYtubeVideo: (videoUrl: string) => void;
+  downloadYtHandler: (callback: (event: IpcRendererEvent, result: Record<string, any>) => void) => void;
 }
 
+// 这里是为渲染线程做的api
 // Custom APIs for renderer
 const api: CustomApi = {
-  downloadYtubeVideo: (videoUrl: string) => ipcRenderer.invoke("download:ytDlp", videoUrl)
+  downloadYtubeVideo: (videoUrl: string) => ipcRenderer.send("download:ytDlp", videoUrl),
+  downloadYtHandler: callback => ipcRenderer.on("download:result", callback)
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to
