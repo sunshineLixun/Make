@@ -1,6 +1,7 @@
 import youtubedl from "youtube-dl-exec";
 import { whisper } from "../whisper/whisper";
 import { isExistSubtitle } from "../utils/is";
+import { stringToArray, stringToArrayWithNewLine } from "../utils/string";
 import { ytVideoPath } from "../utils/constants";
 
 interface DownloadVideoInfo {
@@ -26,16 +27,19 @@ interface DownloadProgress {
 }
 
 export async function downloadVideoInfo(videoUrl: string): Promise<DownloadVideoInfo> {
-  console.log("downloadVideoInfo");
   const ytRe = await youtubedl(videoUrl, {
     getThumbnail: true,
-    getTitle: true
+    getTitle: true,
+    skipDownload: true
   });
-  console.log("ytRe", ytRe);
+
+  // 这里的ytRe 是 string
+  const output = stringToArrayWithNewLine(ytRe as any);
+
   return {
     type: "info",
-    title: ytRe.title,
-    thumbnail: ytRe.thumbnail
+    title: output[0],
+    thumbnail: output[1]
   };
 }
 
@@ -55,20 +59,16 @@ export async function downloadYt(
     try {
       const buffer = Buffer.from(data, "utf-8");
 
-      let output = buffer
-        .toString()
-        .trim()
-        .split(" ")
-        .filter(n => n);
+      let output = stringToArray(buffer.toString());
 
-      console.log(output);
-
-      if (output[0] === "[download]" && parseFloat(output[1])) {
-        const result: DownloadProgress = {
-          type: "progress",
-          progress: parseFloat(output[1])
-        };
-        progressFn(result);
+      if (output.length >= 5) {
+        if (output[0] === "[download]" && output[1].includes("%") && parseFloat(output[1]) && output[4] === "at") {
+          const result: DownloadProgress = {
+            type: "progress",
+            progress: parseFloat(output[1])
+          };
+          progressFn(result);
+        }
       }
     } catch (err) {
       console.log("parse error", err);
