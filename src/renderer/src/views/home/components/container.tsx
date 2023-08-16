@@ -21,9 +21,8 @@ export default function Container() {
     // ]).then(res => {
     //   console.log(res);
     // });
-
-    window.api.downloadYtHandler((event, result) => {
-      console.log(event, result);
+    window.api.downloadYtHandler((_, result) => {
+      console.log("downloadYtHandler", result);
     });
   }, []);
 

@@ -1,4 +1,9 @@
+import { app } from "electron";
+import fs from "node:fs";
 import youtubedl from "youtube-dl-exec";
+import { whisper } from "./whisper";
+
+const downloadPath = app.getAppPath() + "/download/" + "%(id)s.%(ext)s";
 
 interface DownloadErrorResult {
   type: "failed";
@@ -6,18 +11,14 @@ interface DownloadErrorResult {
 
 interface DownloadSuccessResult {
   type: "finished";
+  // 是否存在字幕
+  isExistSubtitle: boolean;
 }
 
 interface DownloadProgress {
   type: "progress";
   // 下载进度
   progress: number;
-  // 总文件大小
-  size: string;
-  // 下载速度
-  speed: string;
-  // 预估下载需要的时间
-  estimated: string;
 }
 
 export function downloadYt(
@@ -28,13 +29,15 @@ export function downloadYt(
     writeAutoSub: true,
     writeSub: true,
     convertSubs: "srt",
-    output: process.cwd() + "/resources/subtitle",
-    format: "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best"
+    output: downloadPath,
+    format: "mp4/bestvideo/best"
   });
 
   ytDownload.stdout?.on("data", data => {
     try {
       const buffer = Buffer.from(data, "utf-8");
+
+      console.log(buffer.toString());
 
       let output = buffer
         .toString()
@@ -47,10 +50,7 @@ export function downloadYt(
       if (output[0] === "[download]" && parseFloat(output[1])) {
         const result: DownloadProgress = {
           type: "progress",
-          progress: parseFloat(output[1]),
-          size: output[4],
-          speed: output[6],
-          estimated: output[8]
+          progress: parseFloat(output[1])
         };
         progressFn(result);
       }
@@ -64,8 +64,15 @@ export function downloadYt(
   });
 
   ytDownload.stdout?.on("end", () => {
+    const isExistSub = existSubtitle();
+
+    if (!isExistSub) {
+      whisper();
+    }
+
     const result: DownloadSuccessResult = {
-      type: "finished"
+      type: "finished",
+      isExistSubtitle: isExistSub
     };
     progressFn(result);
   });
@@ -73,4 +80,8 @@ export function downloadYt(
   ytDownload.stdout?.on("close", data => {
     console.log("close", data);
   });
+}
+
+function existSubtitle() {
+  return fs.existsSync(downloadPath);
 }
