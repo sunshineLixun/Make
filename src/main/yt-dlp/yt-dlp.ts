@@ -1,5 +1,5 @@
 import youtubedl from "youtube-dl-exec";
-import { whisper } from "../whisper/whisper";
+import { doWhisper } from "../whisper/whisper";
 import { isExistSubtitle } from "../utils/is";
 import { stringToArray, stringToArrayWithNewLine } from "../utils/string";
 import { ytVideoPath } from "../utils/constants";
@@ -83,7 +83,7 @@ export async function downloadYt(
     const isExistSub = isExistSubtitle();
 
     if (!isExistSub) {
-      whisper();
+      doWhisper();
     }
 
     const result: DownloadSuccessResult = {
